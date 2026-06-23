@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE NEO — The Tomorrow 2025</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=DM+Mono:wght@300;400;500&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --deep-purple: #7A3EFF;
+            --neon-violet: #B44CFF;
+            --electric-blue: #00D9FF;
+            --dark-navy: #0B0F1A;
+            --midnight-purple: #120A24;
+            --soft-white: #EAF7FF;
+            --glow-blue: rgba(0, 217, 255, 0.15);
+            --glow-purple: rgba(122, 62, 255, 0.2);
+        }
+
+        html {
+            scroll-behavior: auto;
+            overflow-x: hidden
+        }
+
+        body {
+            background: #0B0F1A;
+            color: #EAF7FF;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23B44CFF" stroke="%23EAF7FF" stroke-width="1.5"><polygon points="2,2 20,10 11,13 8,21"/></svg>') 2 2, auto;
+        }
+
+        a,
+        button,
+        .nav-cta,
+        .district-btn,
+        .btn-primary,
+        .btn-outline,
+        .register-side-btn {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%2300D9FF" stroke="%23EAF7FF" stroke-width="1.5"><polygon points="2,2 20,10 11,13 8,21"/></svg>') 2 2, pointer !important;
+        }
+
+        /* CURSOR — native pointer kept, just a subtle lagging glow dot */
+        #cursor-trail {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: #00D9FF;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: background .25s, opacity .25s;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.8), 0 0 16px rgba(0, 217, 255, 0.3);
+            opacity: .75;
+            mix-blend-mode: screen;
+        }
+
+        /* on hover elements, shift dot to violet */
+        body.hovering #cursor-trail {
+            background: #B44CFF;
+            box-shadow: 0 0 8px rgba(180, 76, 255, 0.8), 0 0 16px rgba(180, 76, 255, 0.3);
+        }
+
+        /* no second ring element needed */
+        #cursor-aura {
+            display: none;
+        }
+
+        /* CANVAS */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        canvas {
+            display: block
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 1.5rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(11, 15, 26, 0.92) 60%, transparent);
+            /* no backdrop-filter — prevents blur bleed artifact */
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            letter-spacing: .2em;
+            color: #EAF7FF;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+        }
+
+        .logo span {
+            color: #00D9FF
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: 'DM Mono', monospace;
+            font-size: .75rem;
+            color: rgba(234, 247, 255, 0.6);
+            text-decoration: none;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            transition: color .2s, text-shadow .2s;
+        }
+
+        .nav-links a:hover {
+            color: #00D9FF;
+            text-shadow: 0 0 12px rgba(0, 217, 255, 0.6)
+        }
+
+        .nav-cta {
+            font-family: 'DM Mono', monospace;
+            font-size: .7rem;
+            padding: .5rem 1.4rem;
+            border: 1px solid #00D9FF;
+            color: #00D9FF;
+            background: transparent;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        }
+
+        .nav-cta:hover {
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3)
+        }
+
+        /* SCROLL CONTAINER */
+        #scroll-wrapper {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* SECTIONS */
+        .section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            position: relative;
+        }
+
+        /* HERO */
+        #hero {
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding-top: 8rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'DM Mono', monospace;
+            font-size: .7rem;
+            letter-spacing: .3em;
+            color: #00D9FF;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            text-transform: uppercase;
+            animation: fadeUp .8s .3s ease forwards;
+        }
+
+        h1.hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: .95;
+            letter-spacing: -.01em;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp .9s .5s ease forwards;
+        }
+
+        h1.hero-title .line-1 {
+            display: block;
+            background: linear-gradient(135deg, #EAF7FF 40%, #B44CFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1.hero-title .line-2 {
+            display: block;
+            background: linear-gradient(135deg, #00D9FF, #7A3EFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: rgba(234, 247, 255, 0.5);
+            max-width: 500px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+            line-height: 1.7;
+            opacity: 0;
+            animation: fadeUp .9s .7s ease forwards;
+        }
+
+        /* BOTTOM ACTION BAR — now vertical on right side */
+        #bottom-bar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            padding: 1.4rem .7rem;
+            background: rgba(11, 15, 26, 0.85);
+            border: 1px solid rgba(0, 217, 255, 0.12);
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: -4px 0 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(0, 217, 255, 0.07);
+            pointer-events: all;
+            opacity: 0;
+            transition: opacity .6s;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        #bottom-bar.visible {
+            opacity: 1
+        }
+
+        .bbar-left,
+        .bbar-right {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-family: 'DM Mono', monospace;
+            font-size: .55rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: rgba(234, 247, 255, 0.3);
+            white-space: nowrap;
+        }
+
+        .bbar-right {
+            display: none;
+        }
+
+        .bbar-sep {
+            color: rgba(234, 247, 255, 0.15)
+        }
+
+        .bbar-date {
+            color: rgba(0, 217, 255, 0.5)
+        }
+
+        .bbar-coords {
+            color: rgba(180, 76, 255, 0.4)
+        }
+
+        .bbar-center {
+            display: flex;
+            gap: .8rem;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .bbar-btn {
+            font-size: .6rem !important;
+            padding: .5rem 1rem !important;
+            writing-mode: horizontal-tb;
+        }
+
+        /* CTA section button row */
+        .cta-btn-row {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+            pointer-events: all;
+        }
+
+        .btn-primary {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            padding: .9rem 2.4rem;
+            background: linear-gradient(135deg, #7A3EFF, #B44CFF);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #00D9FF, #7A3EFF);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(122, 62, 255, 0.5);
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1
+        }
+
+        .btn-primary span {
+            position: relative;
+            z-index: 1
+        }
+
+        .btn-outline {
+            font-family: 'DM Mono', monospace;
+            font-size: .75rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            padding: .9rem 2.4rem;
+            background: transparent;
+            border: 1px solid rgba(0, 217, 255, 0.4);
+            color: #00D9FF;
+            cursor: pointer;
+            clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+            transition: all .2s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 217, 255, 0.08);
+            border-color: #00D9FF;
+            box-shadow: 0 0 24px rgba(0, 217, 255, 0.2);
+        }
+
+        /* SCROLL INDICATOR — removed */
+        .scroll-hint {
+            display: none;
+        }
+
+        .scroll-line {
+            display: none;
+        }
+
+        /* DISTRICT SECTIONS */
+        .district-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .district-content {
+            position: absolute;
+            padding: 0 4rem;
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity .6s, transform .6s;
+            max-width: 520px;
+            pointer-events: all;
+        }
+
+        .district-content.right-align {
+            right: 0;
+            text-align: right;
+            transform: translateX(40px);
+        }
+
+        .district-content.active {
+            opacity: 1;
+            transform: translateX(0)
+        }
+
+        .district-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: .65rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: #00D9FF;
+            margin-bottom: .8rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .district-tag::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 1px;
+            background: #00D9FF;
+        }
+
+        .district-content.right-align .district-tag {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .district-content.right-align .district-tag::before {
+            display: none
+        }
+
+        .district-content.right-align .district-tag::after {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 1px;
+            background: #00D9FF;
+        }
+
+        .district-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 3.5vw, 3rem);
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #EAF7FF 50%, rgba(180, 76, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .district-desc {
+            font-size: .9rem;
+            color: rgba(234, 247, 255, 0.55);
+            line-height: 1.75;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .district-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .district-content.right-align .district-stats {
+            justify-content: flex-end
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: .2rem
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00D9FF;
+        }
+
+        .stat-label {
+            font-family: 'DM Mono', monospace;
+            font-size: .6rem;
+            letter-spacing: .15em;
+            color: rgba(234, 247, 255, 0.4);
+            text-transform: uppercase;
+        }
+
+        .district-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            font-family: 'DM Mono', monospace;
+            font-size: .7rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #B44CFF;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: .5rem 0;
+            border-bottom: 1px solid rgba(180, 76, 255, 0.3);
+            transition: color .2s, border-color .2s;
+        }
+
+        .district-btn:hover {
+            color: #EAF7FF;
+            border-color: rgba(234, 247, 255, 0.5)
+        }
+
+        .district-btn svg {
+            transition: transform .2s
+        }
+
+        .district-btn:hover svg {
+            transform: translateX(4px)
+        }
+
+        /* HUD ELEMENTS */
+        .hud-corner {
+            position: fixed;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .hud-tl {
+            top: 1rem;
+            left: 1rem
+        }
+
+        .hud-tr {
+            top: 1rem;
+            right: 1rem
+        }
+
+        .hud-bl {
+            bottom: 1rem;
+            left: 1rem
+        }
+
+        .hud-br {
+            bottom: 1rem;
+            right: 1rem
+        }
+
+        .hud-corner svg {
+            width: 40px;
+            height: 40px;
+            stroke: rgba(0, 217, 255, 0.25);
+            fill: none;
+            stroke-width: 1;
+        }
+
+        /* PROGRESS BAR */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(to right, #7A3EFF, #00D9FF);
+            z-index: 200;
+            width: 0%;
+            transition: width .1s;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.6);
+        }
+
+        /* DISTRICT LABELS (giant glowing holographic signs) */
+        .building-sign {
+            position: fixed;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            line-height: 1.1;
+            text-transform: uppercase;
+            color: #ffffff;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.1s linear;
+            white-space: nowrap;
+            text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color), 0 0 80px var(--glow-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            transform-origin: center center;
+        }
+
+        .building-sign.active {
+            opacity: 1;
+        }
+
+        .sign-welcome {
+            font-size: 1.2rem;
+            font-family: 'DM Mono', monospace;
+            font-weight: 500;
+            letter-spacing: 0.4em;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+
+        /* SECTION: FINAL CTA */
+        #cta-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            pointer-events: all;
+        }
+
+        .cta-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #EAF7FF, #00D9FF 50%, #B44CFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-sub {
+            font-size: .95rem;
+            color: rgba(234, 247, 255, 0.45);
+            margin-bottom: 3rem;
+            max-width: 420px;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .countdown {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .count-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .4rem
+        }
+
+        .count-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #00D9FF;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .count-label {
+            font-family: 'DM Mono', monospace;
+            font-size: .6rem;
+            letter-spacing: .2em;
+            color: rgba(234, 247, 255, 0.35);
+            text-transform: uppercase;
+        }
+
+        .count-sep {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: rgba(122, 62, 255, 0.5);
+            align-self: flex-start;
+            padding-top: .05rem;
+        }
+
+        /* GRID OVERLAY — removed to prevent center obstruction */
+        .grid-overlay {
+            display: none;
+        }
+
+        /* SCANLINE — disabled */
+        .scanlines {
+            display: none;
+        }
+
+        /* VIGNETTE — disabled to remove center blur */
+        .vignette {
+            display: none;
+        }
+
+        /* SIDE DATA — removed coordinates */
+        .side-data {
+            display: none;
+        }
+
+        /* VERTICAL REGISTER BUTTON — right side */
+        .register-side {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 90;
+            pointer-events: all;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .register-side-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: #00D9FF;
+            background: rgba(11, 15, 26, 0.85);
+            border: 1px solid rgba(0, 217, 255, 0.25);
+            border-right: none;
+            padding: 1.4rem .7rem;
+            cursor: pointer;
+            transition: all .3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: -4px 0 20px rgba(0, 217, 255, 0.1);
+        }
+
+        .register-side-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00D9FF;
+            color: #EAF7FF;
+            box-shadow: -4px 0 30px rgba(0, 217, 255, 0.3), inset 0 0 20px rgba(0, 217, 255, 0.05);
+        }
+
+        /* DISTRICT HUD — top right, replaces center dots */
+        #district-hud {
+            position: fixed;
+            top: 5.5rem;
+            right: 2.5rem;
+            z-index: 80;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: .35rem;
+            opacity: 0;
+            transition: opacity .5s;
+        }
+
+        #district-hud.visible {
+            opacity: 1
+        }
+
+        .hud-district-name {
+            font-family: 'DM Mono', monospace;
+            font-size: .6rem;
+            letter-spacing: .25em;
+            text-transform: uppercase;
+            color: rgba(0, 217, 255, 0.8);
+            text-align: right;
+            transition: opacity .4s;
+        }
+
+        .hud-progress-track {
+            width: 80px;
+            height: 1px;
+            background: rgba(234, 247, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #7A3EFF, #00D9FF);
+            box-shadow: 0 0 6px rgba(0, 217, 255, 0.6);
+            transition: width .15s linear;
+        }
+
+        .hud-section-counter {
+            font-family: 'Orbitron', monospace;
+            font-size: .5rem;
+            font-weight: 600;
+            letter-spacing: .2em;
+            color: rgba(234, 247, 255, 0.3);
+        }
+
+        /* Dot nav — completely removed */
+        .section-dots {
+            display: none;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes scrollPulse {
+
+            0%,
+            100% {
+                opacity: .6;
+                transform: scaleY(1)
+            }
+
+            50% {
+                opacity: 1;
+                transform: scaleY(1.1)
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: .5
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        /* LOADING SCREEN */
+        #loading {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: #0B0F1A;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .loading-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            letter-spacing: .3em;
+            color: #EAF7FF;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .loading-logo span {
+            color: #00D9FF
+        }
+
+        .loading-bar-wrap {
+            width: 280px;
+            height: 1px;
+            background: rgba(234, 247, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #7A3EFF, #00D9FF);
+            box-shadow: 0 0 12px rgba(0, 217, 255, 0.8);
+            transition: width .05s linear;
+        }
+
+        .loading-text {
+            font-family: 'DM Mono', monospace;
+            font-size: .65rem;
+            letter-spacing: .25em;
+            color: rgba(234, 247, 255, 0.3);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOADING -->
+    <div id="loading">
+        <div class="loading-logo">THE <span>TOMORROW</span></div>
+        <div class="loading-bar-wrap">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+        <div class="loading-text" id="loading-text">Initializing city grid...</div>
+    </div>
+
+    <!-- CURSOR TRAIL -->
+    <div id="cursor-trail"></div>
+    <div id="cursor-aura"></div>
+
+    <!-- SCROLL PROGRESS -->
+    <div id="scroll-progress"></div>
+
+    <!-- HUD CORNERS -->
+    <div class="hud-corner hud-tl">
+        <svg viewBox="0 0 40 40">
+            <path d="M2 20 L2 2 L20 2" />
+        </svg>
+    </div>
+    <div class="hud-corner hud-tr">
+        <svg viewBox="0 0 40 40">
+            <path d="M20 2 L38 2 L38 20" />
+        </svg>
+    </div>
+    <div class="hud-corner hud-bl">
+        <svg viewBox="0 0 40 40">
+            <path d="M2 20 L2 38 L20 38" />
+        </svg>
+    </div>
+    <div class="hud-corner hud-br">
+        <svg viewBox="0 0 40 40">
+            <path d="M20 38 L38 38 L38 20" />
+        </svg>
+    </div>
+
+    <!-- GRID & ATMOSPHERIC FX -->
+    <div class="grid-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <!-- VERTICAL REGISTER BUTTON (right side) -->
+    <div class="register-side">
+        <button class="register-side-btn">Jack In</button>
+    </div>
+
+    <!-- 3D CANVAS -->
+    <div id="canvas-container">
+        <canvas id="three-canvas"></canvas>
+    </div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="logo">THE <span>TOMORROW</span></div>
+        <ul class="nav-links">
+            <li><a href="#districts">Districts</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#workshops">Layout</a></li>
+        </ul>
+        <button class="nav-cta">Join Now</button>
+    </nav>
+
+    <!-- BOTTOM ACTION BAR — removed per request -->
+
+    <!-- DISTRICT HUD (top-right) -->
+    <div id="district-hud">
+        <div class="hud-district-name" id="hud-name">THE NEO</div>
+        <div class="hud-progress-track">
+            <div class="hud-progress-fill" id="hud-fill"></div>
+        </div>
+        <div class="hud-section-counter" id="hud-counter">01 / 08</div>
+    </div>
+
+    <!-- SIDE DOTS (minimal) -->
+    <nav class="section-dots" id="section-dots"></nav>
+
+    <!-- MAIN SCROLL CONTENT -->
+    <div id="scroll-wrapper">
+
+        <!-- HERO -->
+        <section class="section" id="hero">
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                <p class="hero-eyebrow">The Tomorrow 2025 · Asia's Largest Science & Technology Festival</p>
+                <h1 class="hero-title">
+                    <span class="line-1">THE</span>
+                    <span class="line-2">NEO</span>
+                </h1>
+                <p class="hero-sub">Enter a living, breathing city of tomorrow. Every district pulses with innovation,
+                    competition, and discovery.</p>
+                <div class="scroll-hint">
+                    <div class="scroll-line"></div>
+                    <span>Scroll to fly</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- INNOVATION DISTRICT -->
+        <section class="section district-section" id="s-innovation">
+            <div class="district-content" id="dc-innovation">
+                <p class="district-tag">District 01 — Innovation</p>
+                <h2 class="district-title">Innovation District</h2>
+                <p class="district-desc">The collaborative heart of research and forward-thinking technology. It houses
+                    state-of-the-art labs and brainstorming spaces where startups and industry leaders turn abstract
+                    ideas into real-world solutions.</p>
+                <div class="district-stats">
+                    <div class="stat-item"><span class="stat-num">320+</span><span class="stat-label">Projects</span>
+                    </div>
+
+                    <div class="stat-item"><span class="stat-num">48</span><span class="stat-label">Countries</span>
+                    </div>
+                </div>
+                <button class="district-btn">
+                    Explore Projects
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- AI DISTRICT -->
+        <section class="section district-section" id="s-ai">
+            <div class="district-content right-align" id="dc-ai" style="left:auto">
+                <p class="district-tag">District 02 — Intelligence</p>
+                <h2 class="district-title">AI District</h2>
+                <p class="district-desc">Neural networks hum beneath the streets. Machine learning competitions, AI
+                    workshops, and lectures from minds shaping the future of intelligence gather here.</p>
+                <div class="district-stats" style="justify-content:flex-end">
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">15+</span><span
+                            class="stat-label">AI Events</span></div>
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">200K+</span><span
+                            class="stat-label">Parameters</span></div>
+                </div>
+                <button class="district-btn" style="flex-direction:row-reverse">
+                    Enter AI Zone
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        style="transform:scaleX(-1)">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- SHOPPING DISTRICT -->
+        <section class="section district-section" id="s-shopping">
+            <div class="district-content" id="dc-shopping">
+                <p class="district-tag">District 03 — Shopping</p>
+                <h2 class="district-title">Shopping District</h2>
+                <p class="district-desc">A lively retail intersection blending tech boutiques, pop-up shops, and
+                    everyday lifestyle brands. Featuring comfortable cafes and interactive storefronts, it's the perfect
+                    communal space to unwind.</p>
+                <div class="district-stats">
+                    <div class="stat-item"><span class="stat-num">24/7</span><span class="stat-label">Access</span>
+                    </div>
+                    <div class="stat-item"><span class="stat-num">10k+</span><span
+                            class="stat-label">Accommodations</span></div>
+                    <div class="stat-item"><span class="stat-num">1200+</span><span class="stat-label">Stores</span>
+                    </div>
+                </div>
+                <button class="district-btn">
+                    Go Shopping
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- GAMING DISTRICT -->
+        <section class="section district-section" id="s-gaming">
+            <div class="district-content right-align" id="dc-gaming" style="left:auto">
+                <p class="district-tag">District 04 — Gaming</p>
+                <h2 class="district-title">Gaming District</h2>
+                <p class="district-desc">A high-energy zone for interactive entertainment, esports, and game
+                    development. It features immersive AR/VR setups, multiplayer arenas, and collaborative spaces for
+                    gamers and creators to connect.</p>
+                <div class="district-stats" style="justify-content:flex-end">
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">64</span><span
+                            class="stat-label">Teams</span></div>
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">200+</span><span
+                            class="stat-label">Playable Games</span></div>
+                </div>
+                <button class="district-btn" style="flex-direction:row-reverse">
+                    Join Tournament
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        style="transform:scaleX(-1)">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- HACK TOWER -->
+        <section class="section district-section" id="s-hack">
+            <div class="district-content" id="dc-hack">
+                <p class="district-tag">District 05 — Hack Tower</p>
+                <h2 class="district-title">Hack Tower</h2>
+                <p class="district-desc">A multi-level command center built for intensive coding, cybersecurity
+                    challenges, and hackathons. Equipped with high-speed infrastructure and collaborative pods, it’s the
+                    ultimate proving ground for programmers.</p>
+                <div class="district-stats">
+                    <div class="stat-item"><span class="stat-num">36</span><span class="stat-label">AIs</span></div>
+                    <div class="stat-item"><span class="stat-num">400+</span><span class="stat-label">Hackers</span>
+                    </div>
+                    <div class="stat-item"><span class="stat-num">400ft</span><span class="stat-label">Tall</span>
+                    </div>
+                </div>
+                <button class="district-btn">
+                    Join Now
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- LAUNCH HUB -->
+        <section class="section district-section" id="s-launch">
+            <div class="district-content right-align" id="dc-launch" style="left:auto">
+                <p class="district-tag">District 06 — Launch Hub</p>
+                <h2 class="district-title">Launch Hub</h2>
+                <p class="district-desc">The premier launchpad for entrepreneurs to unveil finalized products. With
+                    dynamic presentation stages and networking lounges, it connects visionaries directly with investors
+                    to accelerate market entry.</p>
+                <div class="district-stats" style="justify-content:flex-end">
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">72</span><span
+                            class="stat-label">Hours</span></div>
+                    <div class="stat-item" style="align-items:flex-end"><span class="stat-num">Oct '25</span><span
+                            class="stat-label">Date</span></div>
+                </div>
+                <button class="district-btn" style="flex-direction:row-reverse">
+                    Jack In
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        style="transform:scaleX(-1)">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="section" id="cta-section">
+            <h2 class="cta-title">Your District<br>Is Calling</h2>
+            <p class="cta-sub">The Tomorrow 2025. Three days. Six districts. One city built for the future.</p>
+            <div class="countdown" id="countdown">
+                <div class="count-item"><span class="count-num" id="cd-days">000</span><span
+                        class="count-label">Days</span></div>
+                <span class="count-sep">:</span>
+                <div class="count-item"><span class="count-num" id="cd-hours">00</span><span
+                        class="count-label">Hours</span></div>
+                <span class="count-sep">:</span>
+                <div class="count-item"><span class="count-num" id="cd-mins">00</span><span
+                        class="count-label">Mins</span></div>
+                <span class="count-sep">:</span>
+                <div class="count-item"><span class="count-num" id="cd-secs">00</span><span
+                        class="count-label">Secs</span></div>
+            </div>
+            <div class="cta-btn-row">
+                <button class="btn-primary"><span>Jack In to The Tomorrow</span></button>
+                <button class="btn-outline">View All Events</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        // ─── CONSTANTS & DISTRICTS ─────────────────────────────────────────────────
+        const DISTRICTS = [
+            { id: 'hero', label: 'The Neo', color: 0x00D9FF },
+            { id: 'innovation', label: 'Innovation District', color: 0x7A3EFF },
+            { id: 'ai', label: 'AI District', color: 0x00D9FF },
+            { id: 'shopping', label: 'Shopping District', color: 0xB44CFF },
+            { id: 'gaming', label: 'Gaming District', color: 0x7A3EFF },
+            { id: 'hack', label: 'Hack Tower', color: 0x00D9FF },
+            { id: 'launch', label: 'Launch Hub', color: 0xB44CFF },
+            { id: 'cta', label: 'Jack In', color: 0x00D9FF },
+        ];
+
+        // ─── LOADING ────────────────────────────────────────────────────────────────
+        const loadingMsgs = [
+            'Initializing city grid...', 'Spawning districts...', 'Loading neon matrices...',
+            'Calibrating camera...', 'Warming up thrusters...', 'City online.'
+        ];
+        let lp = 0;
+        const loadBar = document.getElementById('loading-bar');
+        const loadText = document.getElementById('loading-text');
+        const loadingEl = document.getElementById('loading');
+        function tickLoad() {
+            lp += Math.random() * 3 + 1;
+            if (lp > 100) lp = 100;
+            loadBar.style.width = lp + '%';
+            loadText.textContent = loadingMsgs[Math.floor(lp / 100 * 5.9)];
+            if (lp < 100) { setTimeout(tickLoad, 60) }
+            else {
+                setTimeout(() => {
+                    gsap.to(loadingEl, {
+                        opacity: 0, duration: .8, ease: 'power2.inOut', onComplete: () => {
+                            loadingEl.style.display = 'none';
+                            initApp();
+                        }
+                    });
+                }, 400);
+            }
+        }
+        tickLoad();
+
+        // ─── INIT ────────────────────────────────────────────────────────────────────
+        function initApp() {
+            gsap.registerPlugin(ScrollTrigger);
+            setupCursor();
+            setupThreeJS();
+            setupScrollAnimations();
+            setupCountdown();
+            setupHoverLinks();
+            // bottom bar removed
+        }
+
+        // ─── CURSOR ──────────────────────────────────────────────────────────────────
+        function setupCursor() {
+            const trail = document.getElementById('cursor-trail');
+            let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+            let tx = mx, ty = my;
+            document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY });
+            function animCursor() {
+                // small lag factor — dot gently chases, doesn't fight native cursor
+                tx += (mx - tx) * .10;
+                ty += (my - ty) * .10;
+                trail.style.left = tx + 'px';
+                trail.style.top = ty + 'px';
+                requestAnimationFrame(animCursor);
+            }
+            animCursor();
+        }
+
+        // ─── THREE.JS CITY ──────────────────────────────────────────────────────────
+        function setupThreeJS() {
+            const canvas = document.getElementById('three-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x0B0F1A, 1);
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 1.2;
+
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0B0F1A, 0.022);
+
+            const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(0, 6, 40);
+            camera.lookAt(0, 0, 0);
+
+            // ── CAMERA PATH (keyframes per scroll section) ──
+            const camPath = [
+                { pos: [0, 6, 40], look: [0, 0, 0] },       // hero
+                { pos: [-18, 4, 10], look: [-8, 2, 0] },      // innovation
+                { pos: [20, 8, 5], look: [10, 3, 0] },      // ai
+                { pos: [-15, 3, -5], look: [-8, 1, -15] },    // robotics
+                { pos: [18, 10, -20], look: [8, 4, -30] },     // gaming
+                { pos: [-10, 6, -35], look: [-5, 2, -45] },    // hack
+                { pos: [12, 5, -50], look: [6, 2, -60] },     // launch
+                { pos: [0, 20, -60], look: [0, 0, -60] },     // cta
+            ];
+
+            // ── CITY GEOMETRY ──
+            const cityGroup = new THREE.Group();
+            scene.add(cityGroup);
+
+            function rng(min, max) { return min + Math.random() * (max - min) }
+
+            // Generate a realistic window texture
+            function generateWindowTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, 256, 512);
+
+                for (let y = 8; y < 504; y += 16) {
+                    if (Math.random() > 0.8) continue; // Random empty floors
+                    for (let x = 8; x < 248; x += 16) {
+                        if (Math.random() > 0.3) {
+                            ctx.fillStyle = Math.random() > 0.8 ? '#ffffff' : (Math.random() > 0.5 ? '#aaaaaa' : '#555555');
+                            ctx.fillRect(x, y, 10, 10);
+                        }
+                    }
+                }
+                const tex = new THREE.CanvasTexture(canvas);
+                tex.wrapS = THREE.RepeatWrapping;
+                tex.wrapT = THREE.RepeatWrapping;
+                return tex;
+            }
+            const windowTex = generateWindowTexture();
+
+            // district clusters: [x, z, count, colorHex, heightMult, name]
+            const clusters = [
+                [0, 0, 20, 0x7A3EFF, 1.0, null, -1],   // center plaza
+                [-18, 2, 18, 0x00D9FF, 1.2, 'Innovation District', 1],   // innovation
+                [20, 0, 16, 0xB44CFF, 1.1, 'AI District', 2],   // ai
+                [-14, -14, 14, 0x7A3EFF, 0.9, 'Shopping District', 3],   // shopping
+                [18, -20, 14, 0x00D9FF, 1.3, 'Gaming District', 4],   // gaming
+                [-10, -35, 12, 0xB44CFF, 2.0, 'Hack Tower', 5],   // hack tower
+                [12, -50, 10, 0x7A3EFF, 1.0, 'Launch Hub', 6],   // launch hub
+                [-4, -60, 10, 0x00D9FF, 0.8, null, -1],   // background filler
+                [8, -70, 8, 0xB44CFF, 0.7, null, -1],
+                [-20, -55, 8, 0x7A3EFF, 0.9, null, -1],
+                [24, -45, 8, 0x00D9FF, 0.6, null, -1],
+                [0, -80, 12, 0x7A3EFF, 0.5, null, -1],
+            ];
+            window.currentSectionIdx = 0;
+
+            const buildingMeshes = [];
+            const holograms = [];
+            const districtLabels = [];
+
+            const labelsContainer = document.createElement('div');
+            labelsContainer.style.position = 'absolute';
+            labelsContainer.style.top = '0';
+            labelsContainer.style.left = '0';
+            labelsContainer.style.width = '100%';
+            labelsContainer.style.height = '100%';
+            labelsContainer.style.pointerEvents = 'none';
+            labelsContainer.style.zIndex = '20';
+            document.getElementById('canvas-container').appendChild(labelsContainer);
+
+            clusters.forEach(([cx, cz, count, col, hm, name, sIdx]) => {
+                let centerBuilding = null;
+                for (let i = 0; i < count; i++) {
+                    const isCenter = (i === 0 && name);
+
+                    const w = isCenter ? rng(3.5, 5.5) : rng(.8, 3.5);
+                    const d = isCenter ? rng(3.5, 5.5) : rng(.8, 3.5);
+                    const h = isCenter ? rng(14, 20) * hm : rng(2, 12) * hm;
+                    const geo = isCenter && name === 'Hack Tower' ? new THREE.CylinderGeometry(w / 2, w / 2, h, 8) : new THREE.BoxGeometry(w, h, d);
+
+                    const bldgTex = windowTex.clone();
+                    bldgTex.needsUpdate = true;
+                    bldgTex.repeat.set(w * 1.5, h * 1.5);
+
+                    // main body - improved realistic dark glass material
+                    const mat = new THREE.MeshStandardMaterial({
+                        color: 0x050710,
+                        roughness: 0.2,
+                        metalness: 0.9,
+                        emissiveMap: bldgTex,
+                        emissive: col,
+                        emissiveIntensity: isCenter ? rng(1.5, 2.5) : rng(0.5, 1.8)
+                    });
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.position.set(
+                        isCenter ? cx : cx + rng(-6, 6),
+                        h / 2,
+                        isCenter ? cz : cz + rng(-6, 6)
+                    );
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+                    cityGroup.add(mesh);
+                    buildingMeshes.push({ mesh, col });
+
+                    if (isCenter) {
+                        centerBuilding = mesh;
+                    }
+
+                    // wireframe edges for cyberpunk blueprint aesthetic
+                    const edges = new THREE.EdgesGeometry(geo);
+                    const edgeMat = new THREE.LineBasicMaterial({
+                        color: col,
+                        transparent: true,
+                        opacity: isCenter ? 0.6 : 0.35,
+                        blending: THREE.AdditiveBlending
+                    });
+                    const edgeLines = new THREE.LineSegments(edges, edgeMat);
+                    mesh.add(edgeLines);
+
+                    // glow top edge (emissive cap)
+                    if (geo.type === 'BoxGeometry') {
+                        const capGeo = new THREE.BoxGeometry(w + .04, 0.06, d + .04);
+                        const capMat = new THREE.MeshStandardMaterial({
+                            color: col, emissive: col, emissiveIntensity: 2.0,
+                            roughness: .1, metalness: .5,
+                        });
+                        const cap = new THREE.Mesh(capGeo, capMat);
+                        cap.position.set(
+                            mesh.position.x, mesh.position.y + h / 2 + .03, mesh.position.z
+                        );
+                        cityGroup.add(cap);
+                    }
+
+                    // antennas on taller buildings
+                    if (h > 8 && Math.random() > 0.4) {
+                        const antGeo = new THREE.CylinderGeometry(0.02, 0.02, rng(1, 4));
+                        const antMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                        const ant = new THREE.Mesh(antGeo, antMat);
+                        ant.position.set(mesh.position.x + rng(-w / 3, w / 3), mesh.position.y + h / 2 + antGeo.parameters.height / 2, mesh.position.z + rng(-d / 3, d / 3));
+                        cityGroup.add(ant);
+
+                        // glowing beacon on antenna
+                        const beaconPointGeo = new THREE.SphereGeometry(0.08, 8, 8);
+                        const beaconPointMat = new THREE.MeshBasicMaterial({ color: col });
+                        const beaconPoint = new THREE.Mesh(beaconPointGeo, beaconPointMat);
+                        beaconPoint.position.set(0, antGeo.parameters.height / 2, 0);
+                        ant.add(beaconPoint);
+                    }
+
+                    // floating hologram rings around tallest buildings
+                    if ((isCenter || h > 12) && Math.random() > 0.3) {
+                        const ringGeo = new THREE.TorusGeometry(Math.max(w, d) * 0.9, 0.04, 8, 64);
+                        const ringMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+                        const ring = new THREE.Mesh(ringGeo, ringMat);
+                        ring.position.set(mesh.position.x, mesh.position.y + rng(1, 4), mesh.position.z);
+                        ring.rotation.x = Math.PI / 2;
+                        cityGroup.add(ring);
+                        holograms.push(ring);
+                    }
+                }
+
+                if (name && centerBuilding) {
+                    const labelEl = document.createElement('div');
+                    labelEl.className = 'building-sign';
+                    labelEl.style.setProperty('--glow-color', '#' + col.toString(16).padStart(6, '0'));
+
+                    const prefix = name === 'Hack Tower' ? '' : '<div class="sign-welcome">WELCOME TO</div>';
+                    labelEl.innerHTML = `${prefix}<div>${name}</div>`;
+
+                    labelsContainer.appendChild(labelEl);
+
+                    const h = centerBuilding.geometry.parameters.height || 10;
+                    districtLabels.push({
+                        element: labelEl,
+                        position: new THREE.Vector3(cx, h + 8, cz),
+                        sectionIdx: sIdx
+                    });
+                }
+            });
+
+            // GROUND PLANE - made highly reflective (wet pavement look)
+            const groundGeo = new THREE.PlaneGeometry(200, 200, 60, 60);
+            const groundMat = new THREE.MeshStandardMaterial({
+                color: 0x020308, roughness: 0.15, metalness: 0.85,
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -.05;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // GROUND GRID (glowing lines)
+            const gridHelper = new THREE.GridHelper(200, 80, 0x7A3EFF, 0x120A24);
+            gridHelper.position.y = 0;
+            gridHelper.material.opacity = .25;
+            gridHelper.material.transparent = true;
+            gridHelper.material.blending = THREE.AdditiveBlending;
+            scene.add(gridHelper);
+
+            // COMPLEX ROAD NETWORK
+            const roadXs = [-30, -15, 0, 15, 30];
+            const roadZs = [-80, -60, -40, -20, 0, 20];
+
+            roadXs.forEach(rx => {
+                const rGeo = new THREE.PlaneGeometry(0.8, 200);
+                const rMat = new THREE.MeshStandardMaterial({
+                    color: 0x00D9FF, emissive: 0x00D9FF, emissiveIntensity: 1.2,
+                    transparent: true, opacity: .3, blending: THREE.AdditiveBlending
+                });
+                const road = new THREE.Mesh(rGeo, rMat);
+                road.rotation.x = -Math.PI / 2;
+                road.position.set(rx, 0.01, 0);
+                scene.add(road);
+            });
+
+            roadZs.forEach(rz => {
+                const rGeo = new THREE.PlaneGeometry(200, 0.8);
+                const rMat = new THREE.MeshStandardMaterial({
+                    color: 0x00D9FF, emissive: 0x00D9FF, emissiveIntensity: 1.2,
+                    transparent: true, opacity: .3, blending: THREE.AdditiveBlending
+                });
+                const road = new THREE.Mesh(rGeo, rMat);
+                road.rotation.x = -Math.PI / 2;
+                road.position.set(0, 0.01, rz);
+                scene.add(road);
+            });
+
+            // MASSIVE VEHICLE TRAFFIC
+            const vehicles = [];
+            const vehicleGeo = new THREE.BoxGeometry(0.2, 0.1, 0.8);
+            for (let i = 0; i < 200; i++) {
+                const isVerticalRoad = Math.random() > 0.5;
+                const vColor = Math.random() > 0.4 ? 0x00D9FF : (Math.random() > 0.5 ? 0xff2a55 : 0xffffff);
+                const vMat = new THREE.MeshBasicMaterial({ color: vColor, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+                const vMesh = new THREE.Mesh(vehicleGeo, vMat);
+
+                let vx, vz, vy = 0.06;
+                const laneOffset = (Math.random() > 0.5 ? 1 : -1) * rng(0.15, 0.35);
+                const speed = (laneOffset > 0 ? 1 : -1) * rng(0.3, 0.8);
+
+                if (isVerticalRoad) {
+                    vx = roadXs[Math.floor(Math.random() * roadXs.length)] + laneOffset;
+                    vz = rng(-100, 100);
+                    vMesh.rotation.y = 0;
+                } else {
+                    vx = rng(-100, 100);
+                    vz = roadZs[Math.floor(Math.random() * roadZs.length)] + laneOffset;
+                    vMesh.rotation.y = Math.PI / 2;
+                }
+
+                vMesh.position.set(vx, vy, vz);
+                scene.add(vMesh);
+                vehicles.push({ mesh: vMesh, isVertical: isVerticalRoad, speed: speed });
+            }
+
+            // PARTICLES (floating city dust / embers)
+            const partCount = 1500;
+            const partGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(partCount * 3);
+            const colors = new Float32Array(partCount * 3);
+            const partColors = [
+                new THREE.Color(0x7A3EFF),
+                new THREE.Color(0xB44CFF),
+                new THREE.Color(0x00D9FF),
+                new THREE.Color(0xffffff)
+            ];
+            for (let i = 0; i < partCount; i++) {
+                positions[i * 3] = rng(-80, 80);
+                positions[i * 3 + 1] = rng(0, 40);
+                positions[i * 3 + 2] = rng(-100, 60);
+                const c = partColors[Math.floor(Math.random() * partColors.length)];
+                colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+            }
+            partGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            partGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            const partMat = new THREE.PointsMaterial({
+                size: .2, vertexColors: true, transparent: true, opacity: .8,
+                sizeAttenuation: true, blending: THREE.AdditiveBlending
+            });
+            const particles = new THREE.Points(partGeo, partMat);
+            scene.add(particles);
+
+            // LIGHTING
+            const ambLight = new THREE.AmbientLight(0x0B0F1A, .8);
+            scene.add(ambLight);
+
+            const dirLight = new THREE.DirectionalLight(0x7A3EFF, .4);
+            dirLight.position.set(20, 30, 10);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // District point lights
+            [
+                [-18, 4, 10, 0x00D9FF],
+                [20, 4, 0, 0xB44CFF],
+                [-12, 4, -15, 0x7A3EFF],
+                [18, 4, -22, 0x00D9FF],
+                [-8, 4, -37, 0xB44CFF],
+                [12, 4, -52, 0x7A3EFF],
+            ].forEach(([x, y, z, c]) => {
+                const pl = new THREE.PointLight(c, .8, 25);
+                pl.position.set(x, y, z);
+                scene.add(pl);
+            });
+
+            // volumetric "beacon" cylinder lights from tallest buildings
+            const beaconGeo = new THREE.CylinderGeometry(.03, 1.5, 18, 8, 1, true);
+            const beaconMat = new THREE.MeshBasicMaterial({
+                color: 0xB44CFF, transparent: true, opacity: .04, side: THREE.BackSide,
+            });
+            const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+            beacon.position.set(-10, 9, -35);
+            scene.add(beacon);
+
+            // ── SCROLL-DRIVEN CAMERA ──
+            const cameraState = {
+                x: camPath[0].pos[0], y: camPath[0].pos[1], z: camPath[0].pos[2],
+                lx: camPath[0].look[0], ly: camPath[0].look[1], lz: camPath[0].look[2],
+                progress: 0,
+            };
+
+            // Create scroll proxy
+            const scrollEl = { value: 0 };
+            const totalSections = DISTRICTS.length;
+
+            ScrollTrigger.create({
+                trigger: '#scroll-wrapper',
+                start: 'top top',
+                end: `+=${(totalSections - 1) * 100}%`,
+                scrub: 2.5, // scrub=inertia: higher is slower/smoother, 2.5 is the sweet spot
+                onUpdate: (self) => {
+                    const p = self.progress * (camPath.length - 1);
+                    const i = Math.min(Math.floor(p), camPath.length - 2);
+                    const frac = p - i;
+
+                    // Catmull-Rom style: use 4-point interpolation for S-curve smoothness
+                    const i0 = Math.max(0, i - 1);
+                    const i1 = i;
+                    const i2 = Math.min(camPath.length - 1, i + 1);
+                    const i3 = Math.min(camPath.length - 1, i + 2);
+                    function catmull(p0, p1, p2, p3, t) {
+                        return .5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
+                    }
+                    function lerpCam(key, idx) {
+                        return catmull(
+                            camPath[i0][key][idx], camPath[i1][key][idx],
+                            camPath[i2][key][idx], camPath[i3][key][idx], frac
+                        );
+                    }
+
+                    cameraState.x = lerpCam('pos', 0);
+                    cameraState.y = lerpCam('pos', 1);
+                    cameraState.z = lerpCam('pos', 2);
+                    cameraState.lx = lerpCam('look', 0);
+                    cameraState.ly = lerpCam('look', 1);
+                    cameraState.lz = lerpCam('look', 2);
+                    cameraState.progress = self.progress;
+
+                    // scroll progress bar
+                    document.getElementById('scroll-progress').style.width = (self.progress * 100) + '%';
+
+                    // district HUD update
+                    const hudIdx = Math.min(Math.round(self.progress * (totalSections - 1)), DISTRICTS.length - 1);
+                    window.currentSectionIdx = hudIdx;
+                    const hud = document.getElementById('district-hud');
+                    hud.classList.add('visible');
+                    document.getElementById('hud-name').textContent = DISTRICTS[hudIdx].label.toUpperCase();
+                    document.getElementById('hud-fill').style.width = (self.progress * 100) + '%';
+                    document.getElementById('hud-counter').textContent =
+                        String(hudIdx + 1).padStart(2, '0') + ' / ' + String(totalSections).padStart(2, '0');
+
+
+                }
+            });
+
+            // mouse parallax — gentle, non-intrusive
+            let mouseX = 0, mouseY = 0;
+            let smoothMouseX = 0, smoothMouseY = 0;
+            document.addEventListener('mousemove', e => {
+                mouseX = (e.clientX / window.innerWidth - .5) * 2;
+                mouseY = (e.clientY / window.innerHeight - .5) * 2;
+            });
+
+            // ── RENDER LOOP ──
+            let t = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                t += .008;
+
+                // damp mouse — very slow so it never fights the scroll camera
+                smoothMouseX += (mouseX - smoothMouseX) * .025;
+                smoothMouseY += (mouseY - smoothMouseY) * .025;
+
+                // tiny parallax offset — barely there, cinematic
+                const tx = cameraState.x + smoothMouseX * 0.3;
+                const ty = cameraState.y + smoothMouseY * -0.15;
+
+                // ultra-slow lerp → buttery smooth, no snapping
+                camera.position.x += (tx - camera.position.x) * .022;
+                camera.position.y += (ty - camera.position.y) * .022;
+                camera.position.z += (cameraState.z - camera.position.z) * .022;
+
+                // smooth lookAt too — lerp the look target separately
+                camera.lookAt(
+                    cameraState.lx + smoothMouseX * 0.2,
+                    cameraState.ly,
+                    cameraState.lz
+                );
+
+                // float particles
+                const pos = particles.geometry.attributes.position.array;
+                for (let i = 0; i < partCount; i++) {
+                    pos[i * 3 + 1] += Math.sin(t + i * .5) * .003;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+                particles.rotation.y = t * .03;
+
+                // rotate hologram rings
+                holograms.forEach((ring, i) => {
+                    ring.rotation.z += 0.01 * (i % 2 === 0 ? 1 : -1);
+                    ring.position.y += Math.sin(t * 2 + i) * 0.005;
+                });
+
+                // Move vehicles
+                vehicles.forEach(v => {
+                    if (v.isVertical) {
+                        v.mesh.position.z += v.speed;
+                        if (v.mesh.position.z > 100) v.mesh.position.z = -100;
+                        if (v.mesh.position.z < -100) v.mesh.position.z = 100;
+                    } else {
+                        v.mesh.position.x += v.speed;
+                        if (v.mesh.position.x > 100) v.mesh.position.x = -100;
+                        if (v.mesh.position.x < -100) v.mesh.position.x = 100;
+                    }
+                });
+
+                // Update district labels projection
+                districtLabels.forEach(label => {
+                    const vector = label.position.clone();
+                    vector.project(camera);
+
+                    if (vector.z < 1) {
+                        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                        const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+                        const dist = camera.position.distanceTo(label.position);
+                        const scale = Math.max(0.3, 25 / dist);
+
+                        label.element.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px) scale(${scale})`;
+
+                        if (label.sectionIdx === window.currentSectionIdx) {
+                            label.element.classList.add('active');
+                        } else {
+                            label.element.classList.remove('active');
+                        }
+                    } else {
+                        label.element.classList.remove('active');
+                    }
+                });
+
+                // rotate beacon (safe check in case it's missing)
+                if (typeof beacon !== 'undefined') beacon.rotation.y = t * .2;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // ─── SCROLL DOTS (removed) ─────────────────────────────────────────────
+
+        // ─── SCROLL ANIMATIONS ────────────────────────────────────────────────────
+        function setupScrollAnimations() {
+            // District content reveal
+            const districtIds = ['innovation', 'ai', 'shopping', 'gaming', 'hack', 'launch'];
+            districtIds.forEach(id => {
+                const el = document.getElementById('dc-' + id);
+                if (!el) return;
+                ScrollTrigger.create({
+                    trigger: '#s-' + id,
+                    start: 'top 70%',
+                    end: 'bottom 30%',
+                    onEnter: () => el.classList.add('active'),
+                    onLeave: () => el.classList.remove('active'),
+                    onEnterBack: () => el.classList.add('active'),
+                    onLeaveBack: () => el.classList.remove('active'),
+                });
+            });
+        }
+
+        // ─── COUNTDOWN ────────────────────────────────────────────────────────────
+        function setupCountdown() {
+            // Target: 100 days from now
+            const target = new Date();
+            target.setDate(target.getDate() + 100);
+            function update() {
+                const now = new Date();
+                const diff = Math.max(0, target - now);
+                const days = Math.floor(diff / 86400000);
+                const hrs = Math.floor(diff % 86400000 / 3600000);
+                const mins = Math.floor(diff % 3600000 / 60000);
+                const secs = Math.floor(diff % 60000 / 1000);
+                document.getElementById('cd-days').textContent = String(days).padStart(3, '0');
+                document.getElementById('cd-hours').textContent = String(hrs).padStart(2, '0');
+                document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
+                document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
+            }
+            update(); setInterval(update, 1000);
+        }
+
+        // ─── HOVER EFFECTS ────────────────────────────────────────────────────────
+        function setupHoverLinks() {
+            // Pulse aura on interactive elements
+            const interactives = document.querySelectorAll('button,a,.district-btn,.dot,.nav-cta,.btn-primary,.btn-outline');
+            interactives.forEach(el => {
+                el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            });
+        }
+    </script>
+</body>
+
+</html>
